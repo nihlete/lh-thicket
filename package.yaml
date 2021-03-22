@@ -36,7 +36,7 @@ executables:
     dependencies:
     - lh-thicket
     - array
-
+    - mtl
 tests:
   lh-thicket-test:
     main:                Spec.hs

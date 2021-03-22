@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 42eae381fe3f54eae02ab460e12f52321158b9fa286e050e65099229518f03cd
+-- hash: c75a0eb750b06b17abcdc7f2e968e7f824d3c302c771f33db343d907c6b7368c
 
 name:           lh-thicket
 version:        0.1.0.0
@@ -47,6 +47,7 @@ executable lh-thicket-exe
       array
     , base >=4.7 && <5
     , lh-thicket
+    , mtl
   default-language: Haskell2010
 
 test-suite lh-thicket-test
