@@ -1,6 +1,6 @@
 module Main where
 
-import Data.Array ((!),Array, bounds, array)
+import Data.Array (Array, array, bounds, (!))
 import qualified Data.Array as Arr
 import Data.Ix
 import Lib
@@ -8,7 +8,7 @@ import Lib
 main :: IO ()
 main = someFunc
 
-data Cell = River | RiverHead | Thicket | Empty
+data Cell = River | RiverHead | Forest | Thicket | Empty
 
 instance Show Cell where
   show River = " r "
@@ -27,12 +27,16 @@ instance Show e => Show (WorldMap e) where
 worldmap :: ((Integer, Integer), (Integer, Integer)) -> [((Integer, Integer), e)] -> WorldMap e
 worldmap i e = WorldMap $ array i e
 
+worldmapArr (WorldMap arr) = arr
+
 buildWorldmap r c = worldmap ((0, 0), (r -1, c -1)) ([((i, j), Empty) | i <- [0 .. r -1], j <- [0 .. c -1]])
 
+fillWithThickets :: WorldMap Cell -> WorldMap Cell
 fillWithThickets (WorldMap arr) = WorldMap $ fmap f arr
   where
     f Empty = Thicket
     f a = a
+
 
 (//) :: WorldMap e -> [((Integer, Integer), e)] -> WorldMap e
 (//) (WorldMap arr) c = WorldMap $ arr Arr.// c
@@ -41,9 +45,24 @@ worldmap3x3 = buildWorldmap 3 3
 
 worldmap4x4 = buildWorldmap 4 4
 
-val (WorldMap arr) (i,j) = [(i+1,j), (i,j+1), (i-1,j),(i,j-1)] where
-    b  = bounds arr
-    v = inRange b (i,j)
+speedBoostPoint (WorldMap arr) pos = if n == 0 then val else 2 * n * val
+  where
+    val = f (arr ! pos)
+    n = sum $ map (fromEnum . isRiver) $ crossNeighbour (WorldMap arr) pos
+    f Thicket = 2
+    f Forest = 1
+    f _ = 0
+
+speedBoost (WorldMap arr) = sum $ map (speedBoostPoint (WorldMap arr)) $ range $ bounds arr
+
+isRiver (Just River) = True
+isRiver (Just RiverHead) = True
+isRiver _ = False
+
+crossNeighbour (WorldMap arr) (i, j) = map mbval [(i + 1, j), (i, j + 1), (i -1, j), (i, j -1)]
+  where
+    valid pos = inRange (bounds arr) pos
+    mbval pos = if valid pos then Just (arr ! pos) else Nothing
 
 testmap1 =
   buildWorldmap 4 4
